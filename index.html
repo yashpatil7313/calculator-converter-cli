@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Calculator & Multi-Converter | Internship Project</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 10px;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 9999px;
+    }
+    .nav {
+      display: flex;
+      gap: 8px;
+      background: #e2e8f0;
+      padding: 6px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+    }
+    .nav button {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .nav button.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+    .card {
+      display: none;
+      background: var(--card-bg);
+      padding: 26px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-top: 6px;
+    }
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+    .result-box {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      border-left: 4px solid var(--primary);
+      display: none;
+    }
+    .result-box.show {
+      display: block;
+    }
+    .result-box.err {
+      background: #fef2f2;
+      border-left-color: #dc2626;
+      color: #dc2626;
+    }
+    .result-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+    .result-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .result-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #475569;
+    }
+    footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Interactive Calculator & Multi-Converter</h1>
+      <p>Python Internship Submission • Live Demonstration</p>
+      <span class="badge">Fully Functional Live Demo</span>
+    </header>
+
+    <div class="nav">
+      <button class="active" onclick="switchTab('calc')">➕ Calculator</button>
+      <button onclick="switchTab('unit')">📏 Unit Converter</button>
+      <button onclick="switchTab('curr')">💱 Currency Converter</button>
+    </div>
+
+    <!-- Arithmetic Calculator -->
+    <div id="tab-calc" class="card active">
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="num1">First Number</label>
+          <input type="number" step="any" id="num1" value="24" />
+        </div>
+        <div class="form-group">
+          <label for="num2">Second Number</label>
+          <input type="number" step="any" id="num2" value="6" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="operation">Arithmetic Operation</label>
+        <select id="operation">
+          <option value="+">Addition (+)</option>
+          <option value="-">Subtraction (-)</option>
+          <option value="*">Multiplication (*)</option>
+          <option value="/">Division (/)</option>
+          <option value="%">Modulus (%)</option>
+          <option value="^">Exponentiation (^)</option>
+        </select>
+      </div>
+      <button class="btn" onclick="runCalc()">Calculate</button>
+
+      <div id="calc-result" class="result-box">
+        <div class="result-title">Result</div>
+        <div class="result-value" id="calc-val">--</div>
+        <div class="result-sub" id="calc-sub"></div>
+      </div>
+    </div>
+
+    <!-- Unit Converter -->
+    <div id="tab-unit" class="card">
+      <div class="form-group">
+        <label for="unit-type">Select Conversion</label>
+        <select id="unit-type" onchange="changeUnitLabel()">
+          <optgroup label="Length">
+            <option value="km_to_miles">Kilometers to Miles (km → mi)</option>
+            <option value="miles_to_km">Miles to Kilometers (mi → km)</option>
+          </optgroup>
+          <optgroup label="Weight">
+            <option value="kg_to_lbs">Kilograms to Pounds (kg → lbs)</option>
+            <option value="lbs_to_kg">Pounds to Kilograms (lbs → kg)</option>
+          </optgroup>
+          <optgroup label="Temperature">
+            <option value="c_to_f">Celsius to Fahrenheit (°C → °F)</option>
+            <option value="f_to_c">Fahrenheit to Celsius (°F → °C)</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="unit-label" for="unit-val">Enter distance in Kilometers (km)</label>
+        <input type="number" step="any" id="unit-val" value="10" />
+      </div>
+      <button class="btn" onclick="runUnit()">Convert Unit</button>
+
+      <div id="unit-result" class="result-box">
+        <div class="result-title">Converted Value</div>
+        <div class="result-value" id="unit-val-display">--</div>
+        <div class="result-sub" id="unit-formula"></div>
+      </div>
+    </div>
+
+    <!-- Currency Converter -->
+    <div id="tab-curr" class="card">
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="curr-src">From Currency</label>
+          <select id="curr-src"></select>
+        </div>
+        <div class="form-group">
+          <label for="curr-tgt">To Currency</label>
+          <select id="curr-tgt"></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="curr-amt">Amount</label>
+        <input type="number" step="any" id="curr-amt" value="100" />
+      </div>
+      <button class="btn" onclick="runCurrency()">Convert Currency</button>
+
+      <div id="curr-result" class="result-box">
+        <div class="result-title">Conversion Result</div>
+        <div class="result-value" id="curr-val-display">--</div>
+        <div class="result-sub" id="curr-rate-display"></div>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <label>Reference Exchange Rates (Per 1 USD)</label>
+        <table>
+          <thead>
+            <tr><th>Code</th><th>Symbol</th><th>Currency</th><th>Rate / 1 USD</th></tr>
+          </thead>
+          <tbody id="rates-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer>
+      Interactive Calculator & Unit Converter • Internship Demo
+    </footer>
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchTab(name) {
+      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+
+    // Arithmetic Calculations
+    function runCalc() {
+      const n1 = parseFloat(document.getElementById('num1').value);
+      const n2 = parseFloat(document.getElementById('num2').value);
+      const op = document.getElementById('operation').value;
+      const box = document.getElementById('calc-result');
+      const val = document.getElementById('calc-val');
+      const sub = document.getElementById('calc-sub');
+
+      if (isNaN(n1) || isNaN(n2)) {
+        box.className = 'result-box show err';
+        val.textContent = 'Invalid Input';
+        sub.textContent = 'Please enter valid numbers in both input fields.';
+        return;
+      }
+
+      let res, eq;
+      if (op === '+') {
+        res = n1 + n2;
+      } else if (op === '-') {
+        res = n1 - n2;
+      } else if (op === '*') {
+        res = n1 * n2;
+      } else if (op === '/') {
+        if (n2 === 0) {
+          box.className = 'result-box show err';
+          val.textContent = 'Division Error';
+          sub.textContent = 'Cannot divide by zero.';
+          return;
+        }
+        res = n1 / n2;
+      } else if (op === '%') {
+        if (n2 === 0) {
+          box.className = 'result-box show err';
+          val.textContent = 'Modulo Error';
+          sub.textContent = 'Modulo by zero is undefined.';
+          return;
+        }
+        res = n1 % n2;
+      } else if (op === '^') {
+        if (n1 < 0 && !Number.isInteger(n2)) {
+          box.className = 'result-box show err';
+          val.textContent = 'Complex Number';
+          sub.textContent = 'Negative bases with fractional powers are not supported.';
+          return;
+        }
+        res = Math.pow(n1, n2);
+      }
+
+      box.className = 'result-box show';
+      const cleanRes = Number.isInteger(res) ? res.toLocaleString() : parseFloat(res.toFixed(6)).toString();
+      val.textContent = cleanRes;
+      sub.textContent = `${n1} ${op} ${n2} = ${cleanRes}`;
+    }
+
+    // Unit Conversion
+    const UNIT_FACTORS = {
+      km_to_miles: 0.621371,
+      miles_to_km: 1.0 / 0.621371,
+      kg_to_lbs: 2.20462,
+      lbs_to_kg: 1.0 / 2.20462
+    };
+
+    function changeUnitLabel() {
+      const type = document.getElementById('unit-type').value;
+      const lbl = document.getElementById('unit-label');
+      const map = {
+        km_to_miles: 'Enter distance in Kilometers (km)',
+        miles_to_km: 'Enter distance in Miles (mi)',
+        kg_to_lbs: 'Enter weight in Kilograms (kg)',
+        lbs_to_kg: 'Enter weight in Pounds (lbs)',
+        c_to_f: 'Enter temperature in Celsius (°C)',
+        f_to_c: 'Enter temperature in Fahrenheit (°F)'
+      };
+      lbl.textContent = map[type] || 'Enter Value';
+    }
+
+    function runUnit() {
+      const type = document.getElementById('unit-type').value;
+      const val = parseFloat(document.getElementById('unit-val').value);
+      const box = document.getElementById('unit-result');
+      const valDisp = document.getElementById('unit-val-display');
+      const formDisp = document.getElementById('unit-formula');
+
+      if (isNaN(val)) {
+        box.className = 'result-box show err';
+        valDisp.textContent = 'Invalid Value';
+        formDisp.textContent = 'Please enter a valid numeric value.';
+        return;
+      }
+
+      if ((type.includes('km') || type.includes('kg') || type.includes('lbs') || type.includes('miles')) && val < 0) {
+        box.className = 'result-box show err';
+        valDisp.textContent = 'Negative Input Error';
+        formDisp.textContent = 'Physical distance and weight cannot be negative.';
+        return;
+      }
+
+      let res, formula;
+      if (type === 'km_to_miles') {
+        res = val * UNIT_FACTORS.km_to_miles;
+        formula = `1 km = 0.621371 miles`;
+        valDisp.textContent = `${val.toFixed(3)} km = ${res.toFixed(3)} miles`;
+      } else if (type === 'miles_to_km') {
+        res = val * UNIT_FACTORS.miles_to_km;
+        formula = `1 mile = ${UNIT_FACTORS.miles_to_km.toFixed(4)} km`;
+        valDisp.textContent = `${val.toFixed(3)} miles = ${res.toFixed(3)} km`;
+      } else if (type === 'kg_to_lbs') {
+        res = val * UNIT_FACTORS.kg_to_lbs;
+        formula = `1 kg = 2.20462 lbs`;
+        valDisp.textContent = `${val.toFixed(3)} kg = ${res.toFixed(3)} lbs`;
+      } else if (type === 'lbs_to_kg') {
+        res = val * UNIT_FACTORS.lbs_to_kg;
+        formula = `1 lb = ${UNIT_FACTORS.lbs_to_kg.toFixed(4)} kg`;
+        valDisp.textContent = `${val.toFixed(3)} lbs = ${res.toFixed(3)} kg`;
+      } else if (type === 'c_to_f') {
+        res = (val * 9/5) + 32;
+        formula = `F = C * 9/5 + 32`;
+        valDisp.textContent = `${val.toFixed(2)} °C = ${res.toFixed(2)} °F`;
+      } else if (type === 'f_to_c') {
+        res = (val - 32) * 5/9;
+        formula = `C = (F - 32) * 5/9`;
+        valDisp.textContent = `${val.toFixed(2)} °F = ${res.toFixed(2)} °C`;
+      }
+
+      box.className = 'result-box show';
+      formDisp.textContent = 'Formula: ' + formula;
+    }
+
+    // Forex Currency Logic
+    const FOREX_RATES = {
+      USD: 1.00,
+      EUR: 0.92,
+      GBP: 0.79,
+      INR: 83.50,
+      JPY: 155.00,
+      CAD: 1.36,
+      AUD: 1.52
+    };
+
+    const FOREX_INFO = {
+      USD: ["US Dollar", "$"],
+      EUR: ["Euro", "€"],
+      GBP: ["British Pound", "£"],
+      INR: ["Indian Rupee", "₹"],
+      JPY: ["Japanese Yen", "¥"],
+      CAD: ["Canadian Dollar", "CA$"],
+      AUD: ["Australian Dollar", "A$"]
+    };
+
+    function initCurrencies() {
+      const srcSel = document.getElementById('curr-src');
+      const tgtSel = document.getElementById('curr-tgt');
+      const tableBody = document.getElementById('rates-table-body');
+
+      srcSel.innerHTML = '';
+      tgtSel.innerHTML = '';
+      tableBody.innerHTML = '';
+
+      for (const [code, rate] of Object.entries(FOREX_RATES)) {
+        const info = FOREX_INFO[code] || [code, ''];
+        srcSel.add(new Option(`${code} - ${info[0]} (${info[1]})`, code));
+        tgtSel.add(new Option(`${code} - ${info[0]} (${info[1]})`, code));
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><strong>${code}</strong></td><td>${info[1]}</td><td>${info[0]}</td><td>${rate.toFixed(2)}</td>`;
+        tableBody.appendChild(tr);
+      }
+
+      srcSel.value = 'USD';
+      tgtSel.value = 'INR';
+    }
+
+    function runCurrency() {
+      const src = document.getElementById('curr-src').value;
+      const tgt = document.getElementById('curr-tgt').value;
+      const amt = parseFloat(document.getElementById('curr-amt').value);
+      const box = document.getElementById('curr-result');
+      const valDisp = document.getElementById('curr-val-display');
+      const subDisp = document.getElementById('curr-rate-display');
+
+      if (isNaN(amt) || amt < 0) {
+        box.className = 'result-box show err';
+        valDisp.textContent = 'Invalid Amount';
+        subDisp.textContent = 'Please enter a positive numeric amount.';
+        return;
+      }
+
+      const rate = FOREX_RATES[tgt] / FOREX_RATES[src];
+      const converted = (amt / FOREX_RATES[src]) * FOREX_RATES[tgt];
+
+      const srcSym = FOREX_INFO[src][1];
+      const tgtSym = FOREX_INFO[tgt][1];
+
+      box.className = 'result-box show';
+      valDisp.textContent = `${tgtSym} ${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${tgt}`;
+      subDisp.textContent = `Exchange Rate: 1 ${src} = ${rate.toFixed(4)} ${tgt} (${srcSym} ${amt.toLocaleString('en-US', { minimumFractionDigits: 2 })} ${src})`;
+    }
+
+    // Initialize on page load
+    initCurrencies();
+    changeUnitLabel();
+  </script>
+</body>
+</html>
